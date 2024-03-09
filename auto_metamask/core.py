@@ -42,47 +42,40 @@ def downloadMetamask(url):
     return local_filename
 
 
-def setupWebdriver(metamask_path, chrome_path=None, version=None, chromedriver_path=None):
+def setupMyWebdriver(metamask_path, chrome_path=None):
     """Initialize chrome browser and install metamask extension
 
     :param metamask_path: Extension file path
     :type metamask_path: String
     :param chrome_path: Chrome browser path, default is None.
     :type chrome_path: String
-    :param version: Chrome browser version, make sure it matches the chromedriver version, if not provided, the latest version will be used, default is None. if chromedriver_path is provided, this parameter will be ignored.
-    :type version: String
-    :param chromedriver_path: Chromedriver file path, default is None.
-    :type chromedriver_path: String
     :return: Selenium Chrome WebDriver
     :rtype: WebDriver
     """
 
     options = Options()
     # options.add_argument('--start-maximized')
+    # options.add_argument('--headless')
     options.add_argument("--window-size=1440,900")
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
 
     # Chrome is controlled by automated test software
-    # options.binary_location = "/Applications/Google Chrome Dev.app/Contents/MacOS/Google Chrome Dev"
     options.add_experimental_option('excludeSwitches', ['enable-automation'])
     options.add_experimental_option('useAutomationExtension', False)
+
     options.add_extension(metamask_path)
-    if chrome_path and version:
+    if chrome_path:
         if os.path.exists(chrome_path):
             options.binary_location = chrome_path
-            logging.info("Chrome path is " + chrome_path + ", version is " + version)
+            logging.info("Chrome path is " + chrome_path )
         else:
             logging.warning("Chrome path not found")
     else:
         logging.warning("Chrome path or version not provided, using default")
 
-    if chromedriver_path:
-        s = Service(chromedriver_path)
-    else:
-        s = Service(ChromeDriverManager(version=version, path=chromedriver_path).install())
     global driver
-    driver = webdriver.Chrome(service=s, options=options)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
     # Selenium Stealth settings
     stealth(driver,
@@ -103,12 +96,13 @@ def setupWebdriver(metamask_path, chrome_path=None, version=None, chromedriver_p
     global wait_slow
     wait_slow = WebDriverWait(driver, 40, 1)
 
-    wait.until(EC.number_of_windows_to_be(2))
+    wait_slow.until(EC.number_of_windows_to_be(2))
 
     global metamask_handle
     metamask_handle = driver.window_handles[1]
 
     driver.switch_to.window(metamask_handle)
+
     wait.until(EC.url_contains('home'))
 
     global metamask_url
