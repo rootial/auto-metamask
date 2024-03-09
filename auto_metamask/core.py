@@ -14,10 +14,6 @@ from selenium_stealth import stealth
 from webdriver_manager.chrome import ChromeDriverManager
 
 file_path = os.getcwd()
-log_format = "%(asctime)s %(levelname)s %(message)s"
-date_format = "%m-%d-%Y %H:%M:%S"
-logging.basicConfig(filename=file_path+"/auto-metamask.log", level=logging.INFO,
-                    format=log_format, datefmt=date_format)
 
 
 def downloadMetamask(url):
